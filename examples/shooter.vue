@@ -1,16 +1,17 @@
 <template>
     <div>
-        <text style="font-size: 60px;" @click="add">支持点击交互</text>
+        <text style="font-size: 60px;" @click="add">射中{{record}}</text>
         <scene ref="scene" style="height: 1100;width: 750" @tap="tap" @contact="contact" @removeNode="removeNode"></scene>
     </div>
 </template>
 
 <script>
+    var modal = weex.requireModule('modal')
     module.exports = {
         data: function () {
             return {
                 isAdd:true,
-
+                record:0,
                 ship: {
                     name: 'ship',
                     width: 0.1,
@@ -29,7 +30,7 @@
                     },
                     contents: {
                         type: 'image',
-                        src: 'https://github.com/kfeagle/firstdemo/blob/master/galaxy.png?raw=true'
+                        src: 'https://github.com/kfeagle/firstdemo/blob/master/taobao.jpg?raw=true'
                     }
                 },
                 ball: {
@@ -65,6 +66,7 @@
                     this.$refs['scene'].removeNode(event.nodes.nodeB.name);
                     this.ship.vector.x = Math.random();
                     this.ship.vector.y = Math.random();
+
                 }
 
             },
@@ -74,6 +76,10 @@
                     if(!self.isAdd){
                         self.$refs['scene'].addNode(self.ship);
                         self.isAdd = true;
+                        this.record = this.record+1;
+                        if(this.record%5 == 0 ){
+                            modal.toast({ message: "你已经射中 "+this.record+ "个，牛，休息一下:-)" })
+                        }
 
                     }
                 }
