@@ -5,7 +5,7 @@ weex-ar是一个weex插件，可以通过weexpack快速集成，可以丰富weex
 支持的WeexSDK版本： >= 0.10.0
 
 # demo
-
+```html
 <template>
   <div>
     <text style="font-size: 60px;" @click="add">weex 渲染一个矩形</text>
@@ -41,7 +41,7 @@ weex-ar是一个weex插件，可以通过weexpack快速集成，可以丰富weex
     }
   }
 </script>
-
+```
 
 # 功能
 
