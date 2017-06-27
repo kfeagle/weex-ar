@@ -174,8 +174,6 @@ WX_EXPORT_METHOD(@selector(removeNode:))
         NSDictionary *vector = [options objectForKey:@"vector"];
         node.position =SCNVector3Make([WXConvert CGFloat: [vector objectForKey:@"x"]] , [WXConvert CGFloat: [vector objectForKey:@"y"]], [WXConvert CGFloat: [vector objectForKey:@"z"]]);
     }
-    
-    
     if([@"sphere" isEqualToString:[WXConvert NSString: [options objectForKey:@"type"]]] ){
         ARFrame *frame = self.sceneView.session.currentFrame;
         SCNVector3 dir = SCNVector3Make(0, 0, -1);
@@ -213,7 +211,6 @@ WX_EXPORT_METHOD(@selector(removeNode:))
     SCNView *sceneView = (SCNView *)recognizer.view ;
     CGPoint touchLocation =  [recognizer locationInView:sceneView];
     [self fireEvent:@"tap" params:@{@"touchLocation":@{@"x":@(touchLocation.x),@"y":@(touchLocation.y)}}];
-    
 }
 
 - (UIView *)loadView
