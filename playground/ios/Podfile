@@ -4,13 +4,14 @@ platform :ios, '7.0'
 
 def common
 #    pod 'WeexSDK'
-pod 'WeexSDK', :path=>'/Users/jerry/workspace/pm/github/incubator-weex/'
+    pod 'WeexSDK'
     pod 'WXDevtool', '0.15.3'
     pod 'SDWebImage', '3.7.5'
     pod 'SocketRocket', '0.4.2'
     pod 'ATSDK-Weex', '0.0.1'
     pod 'WeexAr', :path=>'../../'
     pod 'WeexPluginLoader'
+    pod 'SSZipArchive'
 end
 
 target 'WeexDemo' do

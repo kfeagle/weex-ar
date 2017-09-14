@@ -7,8 +7,14 @@
 
 #import "WXModelComponent.h"
 #import <WeexPluginLoader/WeexPluginLoader.h>
+#import "SSZipArchive.h"
 
 WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
+
+@interface WXModelComponent()
+@property (nonatomic, copy) NSString *path;
+@end
+
 
 @implementation WXModelComponent
 
@@ -17,9 +23,11 @@ WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
     self = [super initWithRef:ref type:type styles:styles attributes:attributes events:events weexInstance:weexInstance];
     if (self) {
         self.componentType = WXComponentTypeVirtual;
-        
-        self.node = [self loadModel:styles[@"src"] nodeName:@"" withAnimation:YES];
+        self.node = [SCNNode new];
+        [self _downloadAssentsWithURL:[NSURL URLWithString:attributes[@"src"]]];
+        self.path = attributes[@"path"];
         self.node.position =SCNVector3Make([WXConvert CGFloat: [styles objectForKey:@"x"]] , [WXConvert CGFloat: [styles objectForKey:@"y"]], [WXConvert CGFloat: [styles objectForKey:@"z"]]);
+        
         if(styles[@"scale"]){
             CGFloat scale = [WXConvert CGFloat:styles[@"scale"]];
             self.node.scale = SCNVector3Make(scale, scale, scale);
@@ -28,42 +36,39 @@ WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
     return self;
 }
 
-- (SCNNode *)loadModel:(NSURL *)url nodeName:(NSString *)nodeName withAnimation:(BOOL)withAnimation {
-    SCNScene *scene = [SCNScene sceneWithURL:url options:nil error:nil];
-    
-    SCNNode *node;
-    if (nodeName) {
-        node = [scene.rootNode childNodeWithName:nodeName recursively:YES];
-    } else {
-        node = [[SCNNode alloc] init];
-        NSArray *nodeArray = [scene.rootNode childNodes];
-        for (SCNNode *eachChild in nodeArray) {
-            [node addChildNode:eachChild];
-        }
-    }
-    
-    if (withAnimation) {
-        NSMutableArray *animationMutableArray = [NSMutableArray array];
-        SCNSceneSource *sceneSource = [SCNSceneSource sceneSourceWithURL:url options:@{SCNSceneSourceAnimationImportPolicyKey:SCNSceneSourceAnimationImportPolicyPlayRepeatedly}];
-        
-        NSArray *animationIds = [sceneSource identifiersOfEntriesWithClass:[CAAnimation class]];
-        for (NSString *eachId in animationIds){
-            CAAnimation *animation = [sceneSource entryWithIdentifier:eachId withClass:[CAAnimation class]];
-            [animationMutableArray addObject:animation];
-        }
-        NSArray *animationArray = [NSArray arrayWithArray:animationMutableArray];
-        
-        int i = 1;
-        for (CAAnimation *animation in animationArray) {
-            NSString *key = [NSString stringWithFormat:@"ANIM_%d", i];
-            [node addAnimation:animation forKey:key];
-            i++;
-        }
-    }
-    
-    return node;
-}
+- (void )_downloadAssentsWithURL:(NSURL *)url
+{
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url
+                                                completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                                                    
+                                                    NSArray  *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+                                                    NSString *documentsDirectory = [paths objectAtIndex:0];
+                                                    NSString *inputPath = [documentsDirectory stringByAppendingPathComponent:@"/test.zip"];
+                                                    [[NSFileManager defaultManager] moveItemAtURL:location toURL:[NSURL fileURLWithPath:inputPath] error:nil];
+                                                    
+                                                    NSError *zipError = nil;
+                                                    
+                                                    [SSZipArchive unzipFileAtPath:inputPath toDestination:documentsDirectory overwrite:YES password:nil error:&zipError];
+                                                    
+                                                    if( zipError ){
+                                                        NSLog(@"Something went wrong while unzipping: %@", zipError.debugDescription);
+                                                    }else {
+                                                        NSLog(@"Archive unzipped successfully");
+                                                        NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+                                                        documentsDirectoryURL = [documentsDirectoryURL URLByAppendingPathComponent:self.path];
+                                                        
+                                                        SCNScene *scene = [SCNScene sceneWithURL:documentsDirectoryURL options:nil error:nil];
+                                                        NSArray *nodeArray = [scene.rootNode childNodes];
+                                                        for (SCNNode *eachChild in nodeArray) {
+                                                            [self.node addChildNode:eachChild];
+                                                        }
+                                                    
+                                                    }
+                                                }];
+    [task resume];
 
+}
 - (void)updateStyles:(NSDictionary *)styles
 {
     if(styles[@"color"]){
