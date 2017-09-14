@@ -10,6 +10,9 @@
       return {
         items: [ 
           // common
+          {name: root + '/ar', title: '渲染一个ar场景'},
+          {name: root + '/dragon', title: '渲染一个恐龙'},
+          {name: root + '/atapar', title: '渲染一个 可以点击的ar'},
           {name: root + '/box', title: '渲染一个物体'},
           {name: root + '/boxtap', title: '支持点击交互'},
 

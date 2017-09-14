@@ -50,14 +50,14 @@
 	"use strict";
 
 	if (window.Weex) {
-	  Weex.install(__webpack_require__(24));
+	  Weex.install(__webpack_require__(30));
 	} else if (window.weex) {
-	  weex.install(__webpack_require__(24));
+	  weex.install(__webpack_require__(30));
 	}
 
 /***/ }),
 
-/***/ 24:
+/***/ 30:
 /***/ (function(module, exports) {
 
 	'use strict';
