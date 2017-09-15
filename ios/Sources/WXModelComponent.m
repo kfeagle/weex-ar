@@ -8,11 +8,14 @@
 #import "WXModelComponent.h"
 #import <WeexPluginLoader/WeexPluginLoader.h>
 #import "SSZipArchive.h"
+#import <WeexSDK/WXUtility.h>
 
 WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
+#define WX_MODEL_DOWNLOAD_DIR [NSString stringWithFormat:@"%@/wxdownload",[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0]]
 
 @interface WXModelComponent()
 @property (nonatomic, copy) NSString *path;
+@property (nonatomic, copy) NSString *fileName;
 @end
 
 
@@ -22,12 +25,12 @@ WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
 {
     self = [super initWithRef:ref type:type styles:styles attributes:attributes events:events weexInstance:weexInstance];
     if (self) {
+        
         self.componentType = WXComponentTypeVirtual;
         self.node = [SCNNode new];
-        [self _downloadAssentsWithURL:[NSURL URLWithString:attributes[@"src"]]];
         self.path = attributes[@"path"];
+        [self _downloadAssentsWithURL:[NSURL URLWithString:attributes[@"src"]]];
         self.node.position =SCNVector3Make([WXConvert CGFloat: [styles objectForKey:@"x"]] , [WXConvert CGFloat: [styles objectForKey:@"y"]], [WXConvert CGFloat: [styles objectForKey:@"z"]]);
-        
         if(styles[@"scale"]){
             CGFloat scale = [WXConvert CGFloat:styles[@"scale"]];
             self.node.scale = SCNVector3Make(scale, scale, scale);
@@ -38,37 +41,43 @@ WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
 
 - (void )_downloadAssentsWithURL:(NSURL *)url
 {
+    NSArray  *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *inputPath = [documentsDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"/%@.zip",[WXUtility md5:[url absoluteString]]]];
+    self.fileName = [WXUtility md5:[url absoluteString]];
+    NSString *download = [NSString stringWithFormat:@"%@/%@",WX_MODEL_DOWNLOAD_DIR,self.fileName];
+    if ([WXUtility isFileExist:download]) {
+        [self parseNode];
+        return;
+    }
+    typeof(self) __weak weakSelf = self;
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url
                                                 completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-                                                    
-                                                    NSArray  *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-                                                    NSString *documentsDirectory = [paths objectAtIndex:0];
-                                                    NSString *inputPath = [documentsDirectory stringByAppendingPathComponent:@"/test.zip"];
                                                     [[NSFileManager defaultManager] moveItemAtURL:location toURL:[NSURL fileURLWithPath:inputPath] error:nil];
-                                                    
                                                     NSError *zipError = nil;
-                                                    
-                                                    [SSZipArchive unzipFileAtPath:inputPath toDestination:documentsDirectory overwrite:YES password:nil error:&zipError];
-                                                    
+                                                    [SSZipArchive unzipFileAtPath:inputPath toDestination:download overwrite:YES password:nil error:&zipError];
                                                     if( zipError ){
-                                                        NSLog(@"Something went wrong while unzipping: %@", zipError.debugDescription);
+                                                        WXLogError(@"Something went wrong while unzipping: %@", zipError.debugDescription);
                                                     }else {
-                                                        NSLog(@"Archive unzipped successfully");
-                                                        NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
-                                                        documentsDirectoryURL = [documentsDirectoryURL URLByAppendingPathComponent:self.path];
+                                                        [weakSelf parseNode];
                                                         
-                                                        SCNScene *scene = [SCNScene sceneWithURL:documentsDirectoryURL options:nil error:nil];
-                                                        NSArray *nodeArray = [scene.rootNode childNodes];
-                                                        for (SCNNode *eachChild in nodeArray) {
-                                                            [self.node addChildNode:eachChild];
-                                                        }
-                                                    
                                                     }
                                                 }];
     [task resume];
-
 }
+
+-(void)parseNode
+{
+    NSString *documentsDirectory = [NSString stringWithFormat:@"%@/%@/%@",WX_MODEL_DOWNLOAD_DIR,self.fileName,self.path];
+    NSURL *documentsDirectoryURL = [NSURL fileURLWithPath:documentsDirectory];
+    SCNScene *scene = [SCNScene sceneWithURL:documentsDirectoryURL options:nil error:nil];
+    NSArray *nodeArray = [scene.rootNode childNodes];
+    for (SCNNode *eachChild in nodeArray) {
+        [self.node addChildNode:eachChild];
+    }
+}
+
 - (void)updateStyles:(NSDictionary *)styles
 {
     if(styles[@"color"]){
