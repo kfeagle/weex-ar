@@ -11,7 +11,7 @@ def common
     pod 'ATSDK-Weex', '0.0.1'
     pod 'WeexAr', :path=>'../../'
     pod 'WeexPluginLoader'
-    pod 'SSZipArchive'
+    pod  'ZipArchive'
 end
 
 target 'WeexDemo' do
