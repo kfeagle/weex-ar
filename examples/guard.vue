@@ -1,6 +1,6 @@
 <template>
   <div>
-    <text style="font-size: 60px;" @click="add">weex 渲染一只恐龙</text>
+    <text style="font-size: 60px;" @click="add">weex 渲染12个突击兵</text>
     <ar ref="scene" style="height: 1100;width: 750" @tap="tap" @click="update">
       <model  style="x:-2;y:-4;z:-5; scale:1"  src="https://gw.alicdn.com/bao/uploaded/LB1hIbke3oQMeJjy1XaXXcSsFXa.zip?spm=a1z3i.a4.0.0.26ca68fdplMuuU&file=LB1hIbke3oQMeJjy1XaXXcSsFXa.zip" path="art.scnassets/guard.dae" :style="{ color: boxcolor }"> </model>
       <model style="x:0;y:-4;z:-5; scale:1"  src="https://gw.alicdn.com/bao/uploaded/LB1hIbke3oQMeJjy1XaXXcSsFXa.zip?spm=a1z3i.a4.0.0.26ca68fdplMuuU&file=LB1hIbke3oQMeJjy1XaXXcSsFXa.zip" path="art.scnassets/guard.dae"> </model>
