@@ -54,6 +54,10 @@ WX_PlUGIN_EXPORT_COMPONENT(model,WXModelComponent)
         NSURLSession *session = [NSURLSession sharedSession];
         NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url
                                                     completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                                                        if(!location){
+                                                            WXLogError(@"download error");
+                                                            return ;
+                                                        }
                                                         [[NSFileManager defaultManager] moveItemAtURL:location toURL:[NSURL fileURLWithPath:zipPath] error:nil];
                                                         ZipArchive* zip = [[ZipArchive alloc] init];
                                                         if( [zip UnzipOpenFile:zipPath] )

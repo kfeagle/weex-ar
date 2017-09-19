@@ -61,7 +61,7 @@ WX_EXPORT_METHOD(@selector(removeNode:))
     SCNScene *scene = [SCNScene new];
     _sceneView.scene = scene;
     // Run the view's session
-    ARWorldTrackingSessionConfiguration *configuration = [ARWorldTrackingSessionConfiguration new];
+    ARWorldTrackingConfiguration *configuration = [ARWorldTrackingConfiguration new];
     configuration.worldAlignment = ARWorldAlignmentGravity;
     //    configuration.lightEstimationEnabled = YES;
     configuration.planeDetection = ARPlaneDetectionHorizontal;

@@ -23,7 +23,7 @@ WX_PlUGIN_EXPORT_COMPONENT(ar,WXARComponent)
 @property(nonatomic) BOOL lightEstimationEnabled;
 @property (nonatomic, strong) id<WXImageOperationProtocol> imageOperation;
 @property (nonatomic, strong) ARSession* session;
-@property (nonatomic, strong) ARWorldTrackingSessionConfiguration *configuration;
+@property (nonatomic, strong) ARWorldTrackingConfiguration *configuration;
 @property (nonatomic, strong) SCNNode *localOrigin;
 @property (nonatomic, strong) SCNNode *cameraOrigin;
 @property (nonatomic, strong)NSMutableDictionary *nodes; // nodes added to the scene
@@ -58,7 +58,7 @@ WX_PlUGIN_EXPORT_COMPONENT(ar,WXARComponent)
     self.arView.delegate = self;
     self.arView.session.delegate = self;
     
-    ARWorldTrackingSessionConfiguration *configuration = [ARWorldTrackingSessionConfiguration new];
+    ARWorldTrackingConfiguration *configuration = [ARWorldTrackingConfiguration new];
     configuration.worldAlignment = ARWorldAlignmentGravity;
     configuration.lightEstimationEnabled = _lightEstimationEnabled;
     configuration.planeDetection = _planeDetection;
