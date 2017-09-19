@@ -122,6 +122,35 @@ WX_PlUGIN_EXPORT_COMPONENT(ar,WXARComponent)
 
 
 #pragma mark -tap
+
+//-(NSString *)findParentNodeKey:(SCNNode *)node
+//{
+//    NSString *str = nil;
+//    if(node == nil){
+//        str =  nil;
+//    }
+//    if(node.wx_Identifier){
+//        str = node.wx_Identifier;
+//    }
+//    if(!node.wx_Identifier){
+//       str = [self findParentNodeKey:node.parentNode];
+//    }
+//    return str;
+//}
+-(NSString *)findMountNodeKey:(SCNNode *)node
+{
+    if(node == nil){
+        return nil;
+    }
+    if(node.wx_Identifier){
+        return node.wx_Identifier;
+    }
+    if(!node.wx_Identifier){
+        return [self findMountNodeKey:node.parentNode];
+    }
+    return nil;
+}
+
 - (void)onClick:(__unused UITapGestureRecognizer *)recognizer
 {
     SCNView *sceneView = (SCNView *)recognizer.view ;
@@ -133,7 +162,9 @@ WX_PlUGIN_EXPORT_COMPONENT(ar,WXARComponent)
         SCNHitTestResult *res = hitResults[0];
         SCNNode *node =res.node;
         if(node.wx_Identifier){
-            [self fireEvent:@"click" params:@{@"key":node.wx_Identifier}];
+            [self fireEvent:@"click" params:@{@"key":node.wx_Identifier?:@"",@"name":node.name?:@""}];
+        }else{
+            [self fireEvent:@"click" params:@{@"key":node.wx_Identifier?:@"",@"name":node.name?:@"",@"mountnodekey":[self findMountNodeKey:node]?:@"",@"nodetype":@"child"}];
         }
     }
 }
